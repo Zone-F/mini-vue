@@ -1,4 +1,4 @@
-import { effect } from "../effect";
+import { effect,stop } from "../effect";
 import { reactive } from "../reactive";
 
 describe("effect", () => {
@@ -30,7 +30,7 @@ describe("effect", () => {
         expect(foo).toBe(12);
         expect(r).toBe("foo");
     });
-
+    //TODO::scheduler是干嘛用的??作用是什么
     it("scheduler", () => {
         //1、通过effect的第二个参数,给定一个 scheduler(function)
         //2、effect 第一次执行的 还会执行 fn
@@ -65,4 +65,47 @@ describe("effect", () => {
         run()
         expect(dummy).toBe(2);
     });
+
+
+    it("stop",()=>{
+        let dummy;
+        const obj = reactive({foo:1})
+        const runner = effect(()=>{
+            dummy = obj.foo
+        })
+        obj.foo = 2
+        expect(dummy).toBe(2)
+        
+        stop(runner)
+        
+        obj.foo = 3
+        expect(dummy).toBe(2)
+
+        runner()
+        expect(dummy).toBe(3)
+    })
+
+    it("onStop",()=>{
+        let dummy = 1;
+        const onStop = jest.fn(() => {
+            dummy++;
+        });
+
+        const obj = reactive({ foo: 1 });
+        const runner = effect(
+            () => {
+                dummy++;
+            },
+            { onStop }
+        );
+
+        expect(onStop).not.toHaveBeenCalled();
+        expect(dummy).toBe(2);
+
+        // 触发set
+        stop(runner)
+        expect(onStop).toHaveBeenCalledTimes(1);
+        expect(dummy).toBe(3);
+    })
+
 });
