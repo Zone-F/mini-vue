@@ -1,4 +1,4 @@
-import { reactive,readyonly } from "../reactive";
+import { isReactive, reactive,readyonly } from "../reactive";
 
 describe("reactive", () => {
   it("happy path", () => {
@@ -7,15 +7,11 @@ describe("reactive", () => {
 
     expect(original).not.toBe(observed);
     expect(observed.age).toBe(1);
+    
+    expect(isReactive(observed)).toBe(true)
+    expect(isReactive(original)).toBe(false)
   });
 
-  it("readonly",()=>{
-    const original = { foo: 1 };
-    const wrapped = readyonly(original)
-
-    expect(wrapped).not.toBe(original)
-    expect(wrapped.foo).toBe(1)
-  })
   it("warn then call set",()=>{
     console.warn = jest.fn()
 
