@@ -1,18 +1,30 @@
 import { extend } from "./shared";
 
+let activeEffect;
+let shouldTrack;
+
 class ReactiveEffect {
     private _fn: any;
     public scheduler: Function | undefined;
     deps = [];
     active = true;
+    // shouldTrack = true;
     onStop?:()=>void
     constructor(fn, scheduler) {
         this._fn = fn;
         this.scheduler = scheduler;
     }
     run() {
-        activeEffect = this;
-        return this._fn();
+        if(!this.active){
+            return this._fn();
+        }
+        activeEffect = this;        
+        //会收集依赖
+        // shouldTrack 来做区分
+        shouldTrack = true;
+        const result = this._fn()
+        shouldTrack = false
+        return result
     }
     stop() {
         if (this.active) {
@@ -20,12 +32,16 @@ class ReactiveEffect {
             this.onStop && this.onStop()
             this.active = false;
         }
+
     }
 }
 
 const targetMap = new Map();
 // 收集依赖
 export function track(target, key) {
+    if(!activeEffect) return;
+    if(!shouldTrack) return;
+
     let depsMap = targetMap.get(target);
     if (!depsMap) {
         depsMap = new Map();
@@ -38,7 +54,8 @@ export function track(target, key) {
         depsMap.set(key, dep);
     }
 
-    if(!activeEffect) return;
+    // 如果dep已经存在
+    if(dep.has(activeEffect))return;
 
     dep.add(activeEffect);
     activeEffect.deps.push(dep)
@@ -57,16 +74,16 @@ export function trigger(target, key) {
         }
     }
 }
-
+function isTracking() {
+    return shouldTrack && activeEffect !== undefined;
+}
 function cleanupEffect(efftct){
     efftct.deps.forEach((dep) => {
         dep.delete(efftct);
     });
+    efftct.deps.length = 0
 }
 
-
-// export function track(target,key){};
-let activeEffect;
 export function effect(fn, options = {}) {
     const _effect = new ReactiveEffect(fn, options?.scheduler);
     _effect.run();

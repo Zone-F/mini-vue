@@ -11,4 +11,19 @@ describe("readonly",()=>{
         expect(isReadonly(wrapped)).toBe(true)
         expect(isReadonly(original)).toBe(false)
       })   
+      test("should nestend values readonly",()=>{
+        const original = {
+          foo:2,
+          nested :{
+            foo:1
+          },
+          bar:{baz:2}
+        }
+        const  warped = readyonly(original)
+
+        expect(warped).not.toBe(original)
+        expect(isReadonly(warped.bar)).toBe(true)
+        expect(isReadonly(original)).toBe(false)
+        expect(warped.foo).toBe(2)
+      })
 })

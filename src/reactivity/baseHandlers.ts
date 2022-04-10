@@ -1,5 +1,6 @@
 import { track, trigger } from "./effect";
-import { ReactiveFlags } from "./reactive";
+import { reactive, ReactiveFlags, readyonly } from "./reactive";
+import { isObject } from "./shared";
 
 const get = createGetter();
 const set = createSetter();
@@ -14,6 +15,11 @@ function createGetter(isReadonly = false) {
         }
         
         const res = Reflect.get(target, key);
+        // 如果res是一个obj  处理嵌套属性
+        if(isObject(res)){
+            return isReadonly ? readyonly(res) : reactive(res)
+        }
+        
 
         //TODO 搜集依赖
         !isReadonly && track(target, key);
