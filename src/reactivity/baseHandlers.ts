@@ -1,12 +1,13 @@
 import { track, trigger } from "./effect";
 import { reactive, ReactiveFlags, readyonly } from "./reactive";
-import { isObject } from "./shared";
+import { extend, isObject } from "./shared";
 
 const get = createGetter();
 const set = createSetter();
 const readyonlyGetter = createGetter(true);
+const shallowReadonlyGetter = createGetter(true,true);
 
-function createGetter(isReadonly = false) {
+function createGetter(isReadonly = false, shallowReadonly = false) {
     return function get(target, key) {
         if(key === ReactiveFlags.IS_REACTIVE){
             return !isReadonly
@@ -15,6 +16,11 @@ function createGetter(isReadonly = false) {
         }
         
         const res = Reflect.get(target, key);
+
+        if(shallowReadonly){
+            return res;
+        }
+
         // 如果res是一个obj  处理嵌套属性
         if(isObject(res)){
             return isReadonly ? readyonly(res) : reactive(res)
@@ -51,3 +57,14 @@ export const readyonlyHandlers = {
         return true;
     },
 };
+
+export const shallowReadonlyHandlers = extend({},readyonlyHandlers,{
+    get:shallowReadonlyGetter,
+    set: (target, key, value) => {
+        console.warn(
+            `key:${key} set失败 target ${target} 是 shallowReadonly 只读对象`
+        );
+
+        return true;
+    },
+})
