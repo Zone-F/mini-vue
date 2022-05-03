@@ -1,4 +1,4 @@
-import { isReadonly, readyonly } from "../reactive";
+import { isProxy, isReadonly, readyonly } from "../reactive";
 
 describe("readonly",()=>{
     it("readonly",()=>{
@@ -24,6 +24,7 @@ describe("readonly",()=>{
         expect(warped).not.toBe(original)
         expect(isReadonly(warped.bar)).toBe(true)
         expect(isReadonly(original)).toBe(false)
+        expect(isProxy(warped)).toBe(true)
         expect(warped.foo).toBe(2)
       })
 })
