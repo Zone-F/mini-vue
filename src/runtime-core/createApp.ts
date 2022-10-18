@@ -1,5 +1,5 @@
 import { render } from "./render"
-import { creareVNode } from "./vnode"
+import { createVNode } from "./vnode"
 
 export function createApp(rootComonent){
     return {
@@ -7,7 +7,7 @@ export function createApp(rootComonent){
             //先vnode
             //componant -> vnode
             //所有的逻辑操作度基于vnode
-            const vnode = creareVNode(rootComonent)
+            const vnode = createVNode(rootComonent)
             render(vnode,rootContainer)
         }
     }

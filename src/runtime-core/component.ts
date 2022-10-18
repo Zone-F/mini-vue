@@ -39,8 +39,9 @@ export function createComponentInstance(vnode) {
   
   function finishComponentSetup(instance: any) {
     const Component = instance.type;
-  
-    if (!Component.render) {
-      instance.render = Component.render;
-    }
+
+    instance.render = Component.render;
+    // if (!Component.render) {
+    //   instance.render = Component.render;
+    // }
   }

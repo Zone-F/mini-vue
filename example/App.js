@@ -1,4 +1,6 @@
+import { h } from "../../lib/guide-mini-vue.esm.js";
 export const App = {
+    // 必须要写 render
     render(){
         return h("div","hi" + this.msg)
     }
